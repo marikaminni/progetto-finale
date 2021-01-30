@@ -9,6 +9,7 @@ int main(void)
    do {
      menu();
      printf("Scegliere tra le opzioni elencate: \n" );
+     while(getchar()!='\n');
      scanf("%d",&scelta );
 
      if (scelta!=1 && scelta!=2 && scelta!=3)
