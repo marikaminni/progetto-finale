@@ -6,28 +6,36 @@
 int main(void)
 {
   int scelta=0;
-   do {
-     menu();
-     printf("Scegliere tra le opzioni elencate: \n" );
-     while(getchar()!='\n');
-     scanf("%d",&scelta );
 
-     if (scelta!=1 && scelta!=2 && scelta!=3)
+  while (scelta!=3)
+  {
+
+     do {
+
+       menu();
+       printf("Scegliere tra le opzioni elencate: ");
+       
+       scanf("%d",&scelta );
+       while(getchar() !='\n');
+
+       if (scelta!=1 && scelta!=2 && scelta!=3)
+       {
+         printf("la sua scelta non è tra le opzioni elencate, riprovare\n");
+       }
+
+    } while(scelta!=1 && scelta!=2 && scelta!=3);
+
+     switch (scelta)
      {
-       printf("la sua scelta non è tra le opzioni elencate, riprovare\n" );
+       case 1: imposta_gioco();
+       break;
+       case 2: gioca();
+       break;
+       case 3: termina_gioco();
+       break;
+
      }
+  }
 
-  } while(scelta!=1 && scelta!=2 && scelta!=3);
-
-   switch (scelta)
-   {
-     case 1: imposta_gioco();
-     break;
-     case 2: gioca();
-     break;
-     case 3: termina_gioco();
-     break;
-
-   }
   return 0;
 }
