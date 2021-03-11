@@ -12,6 +12,7 @@ static void stampa_giocatori();
 static void inizia_gioco();
 static _Bool gioco_impostato=false;
 static int n_giocatori=0;
+static int max_num_giocatori=10;
 const char* stato_giocatore[]= {"astronauta", "impostore", "assassinato", "defenestrato"};
 const char* tipo_stanza[]= {"vuota", "quest_semplice", "quest_complicata", "botola"};
 static void prima_stanza();
@@ -34,18 +35,38 @@ void imposta_gioco()
   }while (scelta < 4 || scelta >10);
 
   giocatori = (struct Giocatore*) malloc(sizeof(struct Giocatore)*scelta); //creo nell'heap l'array struct Giocatore* giocatori
-  stanza_inizio= (struct Stanza*) malloc(sizeof(struct Stanza));
-  n_giocatori=scelta;
+  stanza_inizio= (struct Stanza*) malloc(sizeof(struct Stanza)); //creo nell'heap la stanza iniziale
+  stanza_inizio->tipo=rand()%4;
+
+  enum Nome_giocatore temp_nomi[10]; // utilizzo una variabile temporanea per evitare di avere ripetizioni nei nomi dei giocatori
+
+  for (int i = 0; i < max_num_giocatori; i++)
+  {
+    temp_nomi[i] = (enum Nome_giocatore)i;
+  }
+  for (int i = 0; i < max_num_giocatori; i++) {    // shuffle array
+    enum Nome_giocatore temp = temp_nomi[i];
+    int randomIndex = rand() % max_num_giocatori;
+    temp_nomi[i]= temp_nomi[randomIndex];
+    temp_nomi[randomIndex] = temp;
+}
+    int num_impostori= (rand()%3) +1;
+    n_giocatori=scelta;
   for (int i = 0; i < scelta; i++)
     {
-
       struct Giocatore *giocatore_corrente= malloc(sizeof(struct Giocatore));
       giocatore_corrente->posizione_stanza= NULL;
-      giocatore_corrente->nome= rand()%scelta; //genera i giocatori randomicamente
-      giocatore_corrente->stato= astronauta;
+      giocatore_corrente->nome= temp_nomi[i];
 
-      giocatori[i]= *giocatore_corrente;
+      if (num_impostori>0)
+        {
+          giocatore_corrente->stato= impostore;
+          num_impostori--;
+        }
+      else
+        giocatore_corrente->stato= astronauta;
 
+    giocatori[i]= *giocatore_corrente;
     }
 
   printf("Digitare il numero delle quest da eseguire per vincere il gioco: ");
@@ -100,29 +121,8 @@ void prima_stanza() // in questa funzione definisco il tipo della stanza inizial
   stanza_inizio->sinistra=NULL;
   stanza_inizio->destra=NULL;
   stanza_inizio->stanza_precedente=NULL;
-   int random= rand()%100;
-   if (random<=24)
+  printf("La stanza iniziale è di tipo %s\n", tipo_stanza[stanza_inizio->tipo] );
 
-     printf("La stanza iniziale è di tipo %s\n", tipo_stanza[stanza_inizio->tipo] );
-
-   else
-
-     if (random>=25 && random<=39)
-     {
-       printf("La stanza iniziale è di tipo %s\n", tipo_stanza[stanza_inizio->tipo] );
-     }
-      else
-
-        if (random>=40 && random<=69)
-        {
-          printf("La stanza iniziale è di tipo %s\n", tipo_stanza[stanza_inizio->tipo] );
-        }
-        else
-
-          if (random>=70 && random<=99)
-          {
-            printf("La stanza iniziale è di tipo %s\n", tipo_stanza[stanza_inizio->tipo] );
-          }
 
   }
 void stampa_giocatori() //stampa le informazioni relative ad ogni giocatore
@@ -132,25 +132,31 @@ void stampa_giocatori() //stampa le informazioni relative ad ogni giocatore
 
     switch (giocatori[i].nome)
     {
-      case 0: printf("rosso\n");
+      case 0: printf("rosso");
       break;
-      case 1: printf("blu\n");
+      case 1: printf("blu");
       break;
-      case 2: printf("verde\n");
+      case 2: printf("verde");
       break;
-      case 3: printf("giallo\n");
+      case 3: printf("giallo");
       break;
-      case 4: printf("bianco\n");
+      case 4: printf("bianco");
       break;
-      case 5: printf("nero\n");
+      case 5: printf("nero");
       break;
-      case 6: printf("marrone\n");
+      case 6: printf("marrone");
       break;
-      case 7: printf("arancione\n");
+      case 7: printf("arancione");
       break;
-      case 8: printf("viola\n");
+      case 8: printf("viola");
       break;
-      case 9: printf("fucsia\n");
+      case 9: printf("fucsia");
+      break;
+    }
+    switch (giocatori[i].stato) {
+      case 0: printf(" astronauta\n" );
+      break;
+      case 1: printf("  impostore\n");
       break;
     }
   }
