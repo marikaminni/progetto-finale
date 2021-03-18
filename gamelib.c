@@ -47,9 +47,6 @@ void imposta_gioco()
 
   giocatori = (struct Giocatore*) malloc(sizeof(struct Giocatore)*scelta); //creo nell'heap l'array struct Giocatore* giocatori
   stanza_inizio= (struct Stanza*) malloc(sizeof(struct Stanza)); //creo nell'heap la stanza iniziale
-  //stanza_inizio->tipo=rand()%4;
-
-    //int tot = counters[0] + counters[1] + counters[2] + counters[3];
 
   enum Nome_giocatore temp_nomi[10]; // utilizzo una variabile temporanea per evitare di avere ripetizioni nei nomi dei giocatori
 
