@@ -64,8 +64,8 @@ static void avanza(struct Giocatore *giocatore_corrente) {
   switch (direzione_presa) {
   case 1:
     if (giocatore_corrente->posizione_stanza->avanti == NULL) {
-      struct Stanza *nuova_stanza =
-          (struct Stanza *)malloc(sizeof(struct Stanza));
+      struct Stanza *nuova_stanza = (struct Stanza *)malloc(
+          sizeof(struct Stanza)); // creo una nuova stanza
       nuova_stanza->descrizione = randomStanza();
       giocatore_corrente->posizione_stanza->avanti = nuova_stanza;
     }
