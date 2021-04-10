@@ -267,8 +267,9 @@ void menu() // Definizione della funzione menu
   printf("Menù di scelta:\n 1) Imposta gioco\n 2) Gioca\n 3) Termina gioco\n");
 }
 
-void stampa_stanza(enum Tipo_stanza choice) // in questa funzione definisco il
-                                            // tipo della stanza iniziale
+void stampa_stanza(
+    enum Tipo_stanza choice) // definisco il tipo della stanza iniziale
+
 {
 
   switch (choice) {
