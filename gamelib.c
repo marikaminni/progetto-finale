@@ -7,13 +7,14 @@
 static struct Giocatore *giocatori;
 struct Stanza *lista_stanze;
 struct Stanza *stanza_inizio;
-unsigned short quest_da_finire;
+unsigned short quest_da_finire, n_quest;
 static void stampa_giocatori();
 static void inizia_gioco();
 static _Bool gioco_impostato = false;
 static int n_giocatori = 0;
 static int max_num_giocatori = 10;
 _Bool debug = false;
+const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
 
 static enum Tipo_stanza randomStanza() {
   int randStanza = ((rand() % 100) + 1);
@@ -43,9 +44,73 @@ static enum Stato_giocatore randStato(int n_giocatori) {
 }
 
 static void avanza(struct Giocatore *giocatore_corrente) {
-  printf("il giocatore avanza\n");
+  int direzione_presa = 0;
+  do {
+    printf("Scegliere in quale direzione procedere :\n");
+    int scelta_direzione;
+    printf(" -1 avanti\n");
+    printf(" -2 destra\n");
+    printf(" -3 sinistra\n");
+    printf(" -4 resta fermo\n");
+    scanf("%d", &scelta_direzione);
+    while (getchar() != '\n')
+      ;
+    if (scelta_direzione < 1 || scelta_direzione > 4) {
+      printf("si deve inserire un numero compreso fra 1 e 4,riprovare\n");
+    } else
+      direzione_presa = scelta_direzione;
+  } while (direzione_presa == 0);
+
+  switch (direzione_presa) {
+  case 1:
+    if (giocatore_corrente->posizione_stanza->avanti == NULL) {
+      struct Stanza *nuova_stanza =
+          (struct Stanza *)malloc(sizeof(struct Stanza));
+      nuova_stanza->descrizione = randomStanza();
+      giocatore_corrente->posizione_stanza->avanti = nuova_stanza;
+    }
+    giocatore_corrente->posizione_stanza =
+        giocatore_corrente->posizione_stanza->avanti;
+    break;
+  case 2:
+    if (giocatore_corrente->posizione_stanza->destra == NULL) {
+      struct Stanza *nuova_stanza =
+          (struct Stanza *)malloc(sizeof(struct Stanza));
+      nuova_stanza->descrizione = randomStanza();
+      giocatore_corrente->posizione_stanza->destra = nuova_stanza;
+    }
+    giocatore_corrente->posizione_stanza =
+        giocatore_corrente->posizione_stanza->destra;
+    break;
+  case 3:
+    if (giocatore_corrente->posizione_stanza->sinistra == NULL) {
+      struct Stanza *nuova_stanza =
+          (struct Stanza *)malloc(sizeof(struct Stanza));
+      nuova_stanza->descrizione = randomStanza();
+      giocatore_corrente->posizione_stanza->sinistra = nuova_stanza;
+    }
+    giocatore_corrente->posizione_stanza =
+        giocatore_corrente->posizione_stanza->sinistra;
+    break;
+  }
 };
-static void esegui_quest(struct Giocatore *giocatore_corrente);
+
+static void esegui_quest(struct Giocatore *giocatore_corrente) {
+  if (giocatore_corrente->posizione_stanza->descrizione == quest_semplice) {
+    quest_da_finire++;
+    giocatore_corrente->posizione_stanza->descrizione = vuota;
+  } else if (giocatore_corrente->posizione_stanza->descrizione ==
+             quest_complicata) {
+    quest_da_finire += 2;
+    giocatore_corrente->posizione_stanza->descrizione = vuota;
+  }
+
+  if (giocatore_corrente->posizione_stanza->descrizione == vuota ||
+      giocatore_corrente->posizione_stanza->descrizione == botola) {
+    printf("Per poter eseguire la quest, il tipo della stanza deve essere: "
+           "semplice o complicata\n");
+  }
+};
 static void chiamata_emergenza(struct Giocatore *giocatore_corrente);
 static void uccidi_astronauta(struct Giocatore *giocatore_corrente);
 static void usa_botola(struct Giocatore *giocatore_corrente);
@@ -54,7 +119,9 @@ static void sabotaggio(struct Giocatore *giocatore_corrente);
 void imposta_gioco() {
   time_t t;
   srand((unsigned)time(&t));
-  int scelta = 0, n_quest = 0;
+  int scelta = 0;
+  n_quest = 0;
+  quest_da_finire = 0;
   if (debug == true) {
     scelta = 3;
   } else {
@@ -98,6 +165,14 @@ void imposta_gioco() {
   }
   enum Tipo_stanza stanza = randomStanza();
 
+  switch (stanza) {
+  case quest_semplice:
+    n_quest++;
+    break;
+  case quest_complicata:
+    n_quest += 2;
+    break;
+  }
   stanza_inizio->avanti = NULL;
   stanza_inizio->sinistra = NULL;
   stanza_inizio->destra = NULL;
@@ -150,7 +225,7 @@ void imposta_gioco() {
   }
 }
 
-void gioca() {
+void gioca(int n_quest) {
   if (gioco_impostato ==
       false) // non si può giocare se non si è impostato il gico
   {
@@ -167,6 +242,7 @@ void gioca() {
     ordine_giocatori[i] = i;
   }
   int turno = 1;
+  // int turn_counter = 0;
   do {
     struct Giocatore *giocatore_corrente;
     for (int i = 0; i < n_giocatori; i++) { // shuffle array
@@ -177,26 +253,27 @@ void gioca() {
     }
     for (int i = 0; i < n_giocatori; i++) {
       giocatore_corrente = &giocatori[ordine_giocatori[i]];
-      printf("-------------------------------------------------------------\n");
+      printf(CLEAR_SCREEN_ANSI);
+      printf("---------------------------------------\n");
       printf("è il turno %d, gioca ", turno);
       stampa_nome(giocatore_corrente->nome);
       stampa_stato(giocatore_corrente->stato);
       stampa_stanza(giocatore_corrente->posizione_stanza->descrizione);
       printf("altri giocatori nella stanza:\n");
       for (int i = 0; i < n_giocatori; i++) {
-        if (i != 0) {
-          struct Giocatore *altrogiocatore = &giocatori[i];
-          if (altrogiocatore->posizione_stanza ==
-              giocatore_corrente->posizione_stanza) {
-            printf("\t- ");
-            stampa_nome(altrogiocatore->nome);
-            printf("\n");
-          }
+
+        struct Giocatore *altrogiocatore = &giocatori[i];
+        if (altrogiocatore->posizione_stanza ==
+                giocatore_corrente->posizione_stanza &&
+            altrogiocatore->nome != giocatore_corrente->nome) {
+          printf("\t- ");
+          stampa_nome(altrogiocatore->nome);
+          printf("\n");
         }
       }
       int scelta_corretta = 0;
       do {
-        printf("scegli una delle seguenti azioni:\n");
+        printf("Scegli una delle seguenti azioni:\n");
         int scelta;
 
         switch (giocatore_corrente->stato) {
@@ -237,6 +314,8 @@ void gioca() {
       case astronauta:
         if (scelta_corretta == 1) {
           avanza(giocatore_corrente);
+        } else if (scelta_corretta == 2) {
+          esegui_quest(giocatore_corrente);
         }
 
         break;
@@ -247,6 +326,11 @@ void gioca() {
 
         break;
       }
+      if (quest_da_finire == n_quest) {
+        printf("\t\tGli astronauti vincono!\n");
+        termina_gioco();
+      }
+      sleep(2);
     }
     turno++;
     // break;
