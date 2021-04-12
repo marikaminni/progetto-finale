@@ -105,8 +105,8 @@ static void esegui_quest(struct Giocatore *giocatore_corrente) {
     giocatore_corrente->posizione_stanza->descrizione = vuota;
   }
 
-  if (giocatore_corrente->posizione_stanza->descrizione == vuota ||
-      giocatore_corrente->posizione_stanza->descrizione == botola) {
+  else if (giocatore_corrente->posizione_stanza->descrizione == vuota ||
+           giocatore_corrente->posizione_stanza->descrizione == botola) {
     printf("Per poter eseguire la quest, il tipo della stanza deve essere: "
            "semplice o complicata\n");
   }
@@ -114,7 +114,18 @@ static void esegui_quest(struct Giocatore *giocatore_corrente) {
 static void chiamata_emergenza(struct Giocatore *giocatore_corrente);
 static void uccidi_astronauta(struct Giocatore *giocatore_corrente);
 static void usa_botola(struct Giocatore *giocatore_corrente);
-static void sabotaggio(struct Giocatore *giocatore_corrente);
+static void sabotaggio(struct Giocatore *giocatore_corrente) {
+  if (giocatore_corrente->posizione_stanza->descrizione == quest_semplice ||
+      giocatore_corrente->posizione_stanza->descrizione == quest_complicata) {
+
+    giocatore_corrente->posizione_stanza->descrizione = vuota;
+  } else if (giocatore_corrente->posizione_stanza->descrizione == vuota ||
+             giocatore_corrente->posizione_stanza->descrizione == botola) {
+    printf(
+        "Per poter effettuare il sabotaggio, il tipo della stanza deve essere: "
+        "semplice o complicata\n");
+  }
+};
 
 void imposta_gioco() {
   time_t t;
@@ -322,6 +333,15 @@ void gioca(int n_quest) {
       case impostore:
         if (scelta_corretta == 1) {
           avanza(giocatore_corrente);
+        } /*else if(scelta_corretta==2){
+          uccidi_astronauta(giocatore_corrente);
+        }else if(scelta_corretta==3){
+          chiamata_emergenza(giocatore_corrente);
+        }else if(scelta_corretta==4){
+          usa_botola(giocatore_corrente);
+        }*/
+        else if (scelta_corretta == 5) {
+          sabotaggio(giocatore_corrente);
         }
 
         break;
