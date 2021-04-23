@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 static struct Giocatore *giocatori;
 struct Stanza *lista_stanze;
@@ -14,6 +15,9 @@ static int n_giocatori = 0;
 static int max_num_giocatori = 10;
 _Bool debug = false;
 const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
+void stampa_stato(enum Stato_giocatore stato);
+void stampa_nome(enum Nome_giocatore nome);
+void stampa_stanza(enum Tipo_stanza choice);
 
 static enum Tipo_stanza randomStanza() {
   int randStanza = ((rand() % 100) + 1);
@@ -63,11 +67,13 @@ static void avanza(struct Giocatore *giocatore_corrente) {
   switch (direzione_presa) {
   case 1:
     if (giocatore_corrente->posizione_stanza->avanti == NULL) {
-      struct Stanza *nuova_stanza = (struct Stanza *)malloc(
-          sizeof(struct Stanza)); // creo una nuova stanza
+      struct Stanza *nuova_stanza =
+          (struct Stanza *)malloc(sizeof(struct Stanza));
       nuova_stanza->descrizione = randomStanza();
       nuova_stanza->emergenza_chiamata = non_effettuata;
       giocatore_corrente->posizione_stanza->avanti = nuova_stanza;
+      nuova_stanza->stanza_precedente = lista_stanze;
+      lista_stanze = nuova_stanza;
     }
     giocatore_corrente->posizione_stanza =
         giocatore_corrente->posizione_stanza->avanti;
@@ -79,6 +85,8 @@ static void avanza(struct Giocatore *giocatore_corrente) {
       nuova_stanza->descrizione = randomStanza();
       nuova_stanza->emergenza_chiamata = non_effettuata;
       giocatore_corrente->posizione_stanza->destra = nuova_stanza;
+      nuova_stanza->stanza_precedente = lista_stanze;
+      lista_stanze = nuova_stanza;
     }
     giocatore_corrente->posizione_stanza =
         giocatore_corrente->posizione_stanza->destra;
@@ -90,6 +98,8 @@ static void avanza(struct Giocatore *giocatore_corrente) {
       nuova_stanza->descrizione = randomStanza();
       nuova_stanza->emergenza_chiamata = non_effettuata;
       giocatore_corrente->posizione_stanza->sinistra = nuova_stanza;
+      nuova_stanza->stanza_precedente = lista_stanze;
+      lista_stanze = nuova_stanza;
     }
     giocatore_corrente->posizione_stanza =
         giocatore_corrente->posizione_stanza->sinistra;
@@ -156,6 +166,10 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
               case impostore:
                 soglia += 20;
                 break;
+              case assassinato:
+                break;
+              case defenestrato:
+                break;
               }
             } else if (giocatore_corrente->stato == impostore) {
               switch (giocatore_stanza->stato) {
@@ -164,6 +178,10 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
                 break;
               case astronauta:
                 soglia += 20;
+                break;
+              case assassinato:
+                break;
+              case defenestrato:
                 break;
               }
             }
@@ -185,22 +203,49 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
     printf("In questa stanza è già stata eseguita la chiamata\n");
   }
 };
-static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
-  struct Giocatore *altrogiocatore;
-  for (int i = 0; i < n_giocatori; i++) {
-    altrogiocatore = &giocatori[i];
-    if (giocatore_corrente->posizione_stanza ==
-        altrogiocatore->posizione_stanza) {
-      if (altrogiocatore->stato == astronauta) {
-        altrogiocatore->stato = assassinato;
-        stampa_nome(altrogiocatore->nome);
-        printf(" è stato assassinato\n");
-        break;
-      }
+static void uccidi_astronauta(struct Giocatore *giocatore_corrente){};
+/*struct Giocatore *altrogiocatore;
+struct Giocatore *giocatore_stanza;
+for (int i = 0; i < n_giocatori; i++) {
+  altrogiocatore = &giocatori[i];
+  if (giocatore_corrente->posizione_stanza ==
+      altrogiocatore->posizione_stanza) {
+    if (altrogiocatore->stato == astronauta) {
+      altrogiocatore->stato = assassinato;
+      stampa_nome(altrogiocatore->nome);
+      printf(" è stato assassinato\n");
+      break;
     }
   }
+   int probabilita = 0;
+    if (giocatore_corrente->posizione_stanza ==
+        altrogiocatore->posizione_stanza) {
+      if (giocatore_stanza->stato == astronauta) {
+        probabilita += 50;
+      }
+
+    } else if () {
+
+  }
+  }
+}
+}
+if ((rand() % 100) + 1 >= probabilita) {
+  giocatore_corrente->stato = defenestrato;
+  stampa_nome(giocatore_corrente->nome);
+  printf(" è stato defenestrato\n");
+  n_defenestrati++;
+  break;
+}
+};*/
+static void usa_botola(struct Giocatore *giocatore_corrente) {
+  if (giocatore_corrente->posizione_stanza->descrizione == botola) {
+
+  } else
+    printf("Per poter utilizzare la funzione usa botola, la stanza deve "
+           "essere "
+           "di tipo botola\n");
 };
-static void usa_botola(struct Giocatore *giocatore_corrente);
 static void sabotaggio(struct Giocatore *giocatore_corrente) {
   if (giocatore_corrente->posizione_stanza->descrizione == quest_semplice ||
       giocatore_corrente->posizione_stanza->descrizione == quest_complicata) {
@@ -242,10 +287,11 @@ void imposta_gioco() {
       scelta); // creo nell'heap l'array struct Giocatore* giocatori
   stanza_inizio = (struct Stanza *)malloc(
       sizeof(struct Stanza)); // creo nell'heap la stanza iniziale
+  lista_stanze = stanza_inizio;
   stanza_inizio->emergenza_chiamata = non_effettuata;
   enum Nome_giocatore
-      temp_nomi[10]; // utilizzo una variabile temporanea per evitare di avere
-                     // ripetizioni nei nomi dei giocatori
+      temp_nomi[10]; // utilizzo una variabile temporanea per evitare di
+                     // avere ripetizioni nei nomi dei giocatori
 
   for (int i = 0; i < max_num_giocatori; i++) {
     temp_nomi[i] = (enum Nome_giocatore)i;
@@ -270,6 +316,10 @@ void imposta_gioco() {
     break;
   case quest_complicata:
     n_quest += 2;
+    break;
+  case botola:
+    break;
+  case vuota:
     break;
   }
   stanza_inizio->avanti = NULL;
@@ -297,12 +347,16 @@ void imposta_gioco() {
     gioco_impostato = true;
     stampa_giocatori();
   } else {
-    printf("Digitare il numero delle quest da eseguire per vincere il gioco: ");
+    printf("Digitare il numero delle quest da eseguire per "
+           "vincere il "
+           "gioco: ");
     scanf("%hd", &n_quest);
     while (getchar() != '\n')
       ;
 
-    printf("Decidere se:\n 1) Stampare i giocatori \n 2) Iniziare il gioco\n");
+    printf("Decidere se:\n 1) Stampare i giocatori \n 2) "
+           "Iniziare il "
+           "gioco\n");
     scanf("%d", &scelta);
     while (getchar() != '\n')
       ;
@@ -331,10 +385,13 @@ void gioca(int n_quest) {
     printf("Prima devi impostare il gioco \n");
   } else {
     // printf("\033[0;32m");
-    printf(
-        "\n\t\t----------------------------------------------------------\n");
+    printf("\n\t\t-------------------------------------------------"
+           "------"
+           "---\n");
     printf(" \t\t                         START              \n");
-    printf("\t\t----------------------------------------------------------\n");
+    printf("\t\t---------------------------------------------------"
+           "------"
+           "-\n");
   }
   int ordine_giocatori[n_giocatori];
   for (int i = 0; i < n_giocatori; i++) {
@@ -356,7 +413,7 @@ void gioca(int n_quest) {
           giocatore_corrente->stato == defenestrato) {
         continue;
       }
-      printf(CLEAR_SCREEN_ANSI);
+      printf("%s", CLEAR_SCREEN_ANSI);
       printf("---------------------------------------\n");
       printf("è il turno %d, gioca ", turno);
       stampa_nome(giocatore_corrente->nome);
@@ -392,6 +449,13 @@ void gioca(int n_quest) {
           printf(" -4: usa botola\n");
           printf(" -5: sabotaggio\n");
           break;
+
+        case defenestrato:
+          scelta_corretta = -1;
+          break;
+        case assassinato:
+          scelta_corretta = -1;
+          break;
         }
         printf("azione:");
         scanf("%d", &scelta);
@@ -409,6 +473,10 @@ void gioca(int n_quest) {
             scelta_corretta = scelta;
           }
 
+          break;
+        case defenestrato:
+          break;
+        case assassinato:
           break;
         }
       } while (scelta_corretta == 0);
@@ -439,6 +507,10 @@ void gioca(int n_quest) {
         }
 
         break;
+      case defenestrato:
+        break;
+      case assassinato:
+        break;
       }
       if (quest_da_finire == n_quest) {
         printf("\t\tGli astronauti vincono!\n");
@@ -452,21 +524,41 @@ void gioca(int n_quest) {
 }
 
 void termina_gioco() {
+  struct Stanza *stanza_corrente = lista_stanze;
+  while (stanza_corrente != NULL) {
+    printf("%p %p %p\n", stanza_corrente, lista_stanze,
+           lista_stanze->stanza_precedente);
+    lista_stanze = lista_stanze->stanza_precedente;
+    free(stanza_corrente);
+    stanza_corrente = lista_stanze;
+  }
+
+  /*struct Giocatore *giocatore_corrente;
+  for (int i = 0; i < n_giocatori; i++) {
+
+    giocatore_corrente = &giocatori[i];
+    giocatore_corrente->posizione_stanza = NULL;
+    printf("%p \n", giocatore_corrente);
+    free(giocatore_corrente);
+  }*/
   free(giocatori);
-  free(stanza_inizio);
-  stanza_inizio = NULL;
-  printf("\n\t\t----------------------------------------------------------\n");
+
+  printf("\n\t\t---------------------------------------------------"
+         "------"
+         "-\n");
   printf(" \t\t                         GAME OVER             \n");
-  printf("\t\t----------------------------------------------------------\n");
+  printf("\t\t-----------------------------------------------------"
+         "-----\n");
 }
 
 void menu() // Definizione della funzione menu
 {
-  printf("Menù di scelta:\n 1) Imposta gioco\n 2) Gioca\n 3) Termina gioco\n");
+  printf("Menù di scelta:\n 1) Imposta gioco\n 2) Gioca\n 3) Termina "
+         "gioco\n");
 }
 
-void stampa_stanza(
-    enum Tipo_stanza choice) // definisco il tipo della stanza iniziale
+void stampa_stanza(enum Tipo_stanza choice) // definisco il tipo
+                                            // della stanza iniziale
 
 {
 
@@ -522,16 +614,23 @@ void stampa_nome(enum Nome_giocatore nome) {
 }
 void stampa_stato(enum Stato_giocatore stato) {
   switch (stato) {
-  case 0:
+  case astronauta:
     printf(" è un astronauta\n");
     break;
-  case 1:
+  case impostore:
     printf(" è un impostore\n");
+    break;
+  case assassinato:
+    printf(" è stato assassinato\n");
+    break;
+  case defenestrato:
+    printf(" è stato defenestrato\n");
     break;
   }
 }
 
-void stampa_giocatori() // stampa le informazioni relative ad ogni giocatore
+void stampa_giocatori() // stampa le informazioni relative ad ogni
+                        // giocatore
 {
   for (int i = 0; i < n_giocatori; i++) {
     stampa_nome(giocatori[i].nome);
