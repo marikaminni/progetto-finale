@@ -11,7 +11,7 @@ struct Stanza *stanza_inizio;
 unsigned short quest_da_finire, n_quest;
 static void stampa_giocatori();
 static _Bool gioco_impostato = false;
-static int n_giocatori = 0;
+static int n_giocatori = 0, n_assassinati = 0, n_defenestrati = 0;
 static int max_num_giocatori = 10;
 _Bool debug = false;
 const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
@@ -130,7 +130,7 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
   if (altrogiocatore->posizione_stanza->emergenza_chiamata == non_effettuata) {
 
     struct Giocatore *giocatore_corrente;
-    int n_assassinati = 0;
+    // int n_assassinati = 0;
     for (int i = 0; i < n_giocatori; i++) {
       giocatore_corrente = &giocatori[i];
       if (giocatore_corrente->posizione_stanza ==
@@ -146,7 +146,7 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
       return;
     }
     altrogiocatore->posizione_stanza->emergenza_chiamata = effettuata;
-    int n_defenestrati = 0;
+    // int n_defenestrati = 0;
     for (int i = 0; i < n_giocatori; i++) {
       giocatore_corrente = &giocatori[i];
       int soglia = 30;
@@ -190,7 +190,7 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
         if ((rand() % 100) + 1 >= soglia) {
           giocatore_corrente->stato = defenestrato;
           stampa_nome(giocatore_corrente->nome);
-          printf(" è stato defenestrato\n");
+          stampa_stato(giocatore_corrente->stato);
           n_defenestrati++;
           break;
         }
@@ -203,41 +203,47 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
     printf("In questa stanza è già stata eseguita la chiamata\n");
   }
 };
-static void uccidi_astronauta(struct Giocatore *giocatore_corrente){};
-/*struct Giocatore *altrogiocatore;
-struct Giocatore *giocatore_stanza;
-for (int i = 0; i < n_giocatori; i++) {
-  altrogiocatore = &giocatori[i];
-  if (giocatore_corrente->posizione_stanza ==
-      altrogiocatore->posizione_stanza) {
-    if (altrogiocatore->stato == astronauta) {
-      altrogiocatore->stato = assassinato;
-      stampa_nome(altrogiocatore->nome);
-      printf(" è stato assassinato\n");
+static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
+  // printf("Quale giocare vuoi uccidere?\n");
+  int probabilita = 0;
+  struct Giocatore *altrogiocatore;
+  for (int i = 0; i < n_giocatori; i++) {
+    altrogiocatore = &giocatori[i];
+    if (giocatore_corrente->posizione_stanza ==
+        altrogiocatore->posizione_stanza) {
+      if (altrogiocatore->stato == astronauta) {
+        altrogiocatore->stato = assassinato;
+        stampa_nome(altrogiocatore->nome);
+        stampa_stato(altrogiocatore->stato);
+        break;
+      }
+    }
+  }
+  for (int i = 0; i < n_giocatori; i++) {
+    altrogiocatore = &giocatori[i];
+    if (giocatore_corrente->posizione_stanza ==
+        altrogiocatore->posizione_stanza) {
+      if (altrogiocatore->stato == astronauta) {
+        probabilita += 50;
+      }
+    } else if (giocatore_corrente->posizione_stanza->stanza_precedente ==
+                   altrogiocatore->posizione_stanza &&
+               altrogiocatore->stato == astronauta) {
+      probabilita += 20;
+    }
+    if ((rand() % 100) + 1 >= probabilita) {
+      giocatore_corrente->stato = defenestrato;
+      stampa_nome(giocatore_corrente->nome);
+      // printf(" è stato defenestrato\n");
+      stampa_stato(giocatore_corrente->stato);
+      n_defenestrati++;
       break;
     }
   }
-   int probabilita = 0;
-    if (giocatore_corrente->posizione_stanza ==
-        altrogiocatore->posizione_stanza) {
-      if (giocatore_stanza->stato == astronauta) {
-        probabilita += 50;
-      }
-
-    } else if () {
-
+  if (n_defenestrati == 0) {
+    printf("Nessuno è stato defenestrato\n");
   }
-  }
-}
-}
-if ((rand() % 100) + 1 >= probabilita) {
-  giocatore_corrente->stato = defenestrato;
-  stampa_nome(giocatore_corrente->nome);
-  printf(" è stato defenestrato\n");
-  n_defenestrati++;
-  break;
-}
-};*/
+};
 static void usa_botola(struct Giocatore *giocatore_corrente) {
   if (giocatore_corrente->posizione_stanza->descrizione == botola) {
 
@@ -271,7 +277,7 @@ void imposta_gioco() {
   } else {
     do {
       printf("Digitare un numero da 4 a 10 per impostare il numero dei "
-             "giocatori: "); // richiedo il numero dei giocatori
+             "giocatori: ");
       scanf("%d", &scelta);
       while (getchar() != '\n')
         ;
@@ -516,6 +522,7 @@ void gioca(int n_quest) {
         printf("\t\tGli astronauti vincono!\n");
         termina_gioco();
       }
+
       sleep(2);
     }
     turno++;
@@ -533,14 +540,6 @@ void termina_gioco() {
     stanza_corrente = lista_stanze;
   }
 
-  /*struct Giocatore *giocatore_corrente;
-  for (int i = 0; i < n_giocatori; i++) {
-
-    giocatore_corrente = &giocatori[i];
-    giocatore_corrente->posizione_stanza = NULL;
-    printf("%p \n", giocatore_corrente);
-    free(giocatore_corrente);
-  }*/
   free(giocatori);
 
   printf("\n\t\t---------------------------------------------------"
