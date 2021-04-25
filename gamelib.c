@@ -204,7 +204,6 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
   }
 };
 static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
-  // printf("Quale giocare vuoi uccidere?\n");
   int probabilita = 0;
   struct Giocatore *altrogiocatore;
   for (int i = 0; i < n_giocatori; i++) {
@@ -234,7 +233,6 @@ static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
     if ((rand() % 100) + 1 >= probabilita) {
       giocatore_corrente->stato = defenestrato;
       stampa_nome(giocatore_corrente->nome);
-      // printf(" è stato defenestrato\n");
       stampa_stato(giocatore_corrente->stato);
       n_defenestrati++;
       break;
@@ -333,7 +331,8 @@ void imposta_gioco() {
   stanza_inizio->destra = NULL;
   stanza_inizio->stanza_precedente = NULL;
   stanza_inizio->descrizione = stanza;
-  while (num_impostori == 0) {
+  while (num_impostori ==
+         0) { // genera giocatori finché non ho almeno un impostore
     for (int i = 0; i < scelta; i++) {
       struct Giocatore *giocatore_corrente = &giocatori[i];
       giocatore_corrente->posizione_stanza = stanza_inizio;
@@ -342,7 +341,7 @@ void imposta_gioco() {
       if (giocatore_corrente->stato == impostore) {
         if (num_impostori < 3) {
           num_impostori++;
-        } else
+        } else // se ci sono 3 impostori non potrà generarne altri
           giocatore_corrente->stato = astronauta;
       }
     }
