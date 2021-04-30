@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
   if (debug == true) {
     imposta_gioco();
   }
+
   do {
 
     menu(); // richiama il menù principale definito in gamelib.c
