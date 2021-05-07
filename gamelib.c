@@ -19,7 +19,7 @@ const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
 #define GIOCATORE_BLU "\x1b[34m"
 #define GIOCATORE_VERDE "\x1b[32m"
 #define GIOCATORE_GIALLO "\x1b[33m"
-#define GIOCATORE_BIANCO "\x1b[36m"
+#define GIOCATORE_BIANCO "\x1b[37m"
 #define GIOCATORE_NERO "\x1b[30m\x1b[47m"
 #define GIOCATORE_MARRONE "\x1b[36m"
 #define GIOCATORE_ARANCIONE "\x1b[91m"
@@ -147,7 +147,6 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
   if (altrogiocatore->posizione_stanza->emergenza_chiamata == non_effettuata) {
 
     struct Giocatore *giocatore_corrente;
-    // int n_assassinati = 0;
     for (int i = 0; i < n_giocatori; i++) {
       giocatore_corrente = &giocatori[i];
       if (giocatore_corrente->posizione_stanza ==
@@ -163,7 +162,6 @@ static void chiamata_emergenza(struct Giocatore *altrogiocatore) {
       return;
     }
     altrogiocatore->posizione_stanza->emergenza_chiamata = effettuata;
-    // int n_defenestrati = 0;
     for (int i = 0; i < n_giocatori; i++) {
       giocatore_corrente = &giocatori[i];
       int soglia = 30;
@@ -433,6 +431,7 @@ void imposta_gioco() {
     scanf("%d", &scelta);
     while (getchar() != '\n')
       ;
+
     gioco_impostato = true;
     do {
 
@@ -458,14 +457,11 @@ void gioca(int n_quest) {
     printf("Prima devi impostare il gioco \n");
     return;
   } else {
-    // printf("\033[0;32m");
-    printf("\n\t\t-------------------------------------------------"
-           "------"
-           "---\n");
-    printf(" \t\t                         START              \n");
-    printf("\t\t---------------------------------------------------"
-           "------"
-           "-\n");
+    printf("\e[0;92m");
+    printf("\t\t\t█▀▀ ▀▀█▀▀ █▀▀█ █▀▀█ ▀▀█▀▀\n");
+    printf("\t\t\t▀▀█ ░░█░░ █▄▄█ █▄▄▀ ░░█░░\n");
+    printf("\t\t\t▀▀▀ ░░▀░░ ▀░░▀ ▀░▀▀ ░░▀░░\n");
+    printf("\e[0m");
   }
   int ordine_giocatori[n_giocatori];
   for (int i = 0; i < n_giocatori; i++) {
@@ -643,20 +639,33 @@ void termina_gioco() {
       stanza_corrente = lista_stanze;
     }
     free(giocatori);
-
-    printf("\n\t\t---------------------------------------------------"
-           "------"
-           "-\n");
-    printf(" \t\t                         GAME OVER             \n");
-    printf("\t\t-----------------------------------------------------"
-           "-----\n");
+    printf("\e[0;91m\n");
+    printf("\t\t\t█▀▀ ▄▀█ █▀▄▀█ █▀▀   █▀█ █░█ █▀▀ █▀█\n");
+    printf("\t\t\t█▄█ █▀█ █░▀░█ ██▄   █▄█ ▀▄▀ ██▄ █▀▄\n");
+    printf("\e[0m");
     gioco_impostato = false;
   }
 }
 
 void menu() { // Definizione della funzione menu
-  printf("Menù principale:\n 1) Imposta gioco\n 2) Gioca\n 3) Termina "
-         "gioco\n");
+  printf("\e[0;36m\n");
+  printf(
+      "\t░█████╗░███╗░░░███╗░█████╗░███╗░░██╗░██████╗░  ██╗░░░██╗░██████╗\n");
+  printf(
+      "\t██╔══██╗████╗░████║██╔══██╗████╗░██║██╔════╝░  ██║░░░██║██╔════╝\n");
+  printf(
+      "\t███████║██╔████╔██║██║░░██║██╔██╗██║██║░░██╗░  ██║░░░██║╚█████╗░\n");
+  printf(
+      "\t██╔══██║██║╚██╔╝██║██║░░██║██║╚████║██║░░╚██╗  ██║░░░██║░╚═══██╗\n");
+  printf(
+      "\t██║░░██║██║░╚═╝░██║╚█████╔╝██║░╚███║╚██████╔╝  ╚██████╔╝██████╔╝\n");
+  printf(
+      "\t╚═╝░░╚═╝╚═╝░░░░░╚═╝░╚════╝░╚═╝░░╚══╝░╚═════╝░  ░╚═════╝░╚═════╝░\n");
+  printf("\e[0m");
+  printf("\e[1;37m");
+  printf("\n\t\t\t\tMenù principale:\n");
+  printf("\e[0m");
+  printf("\n 1) Imposta gioco\n 2) Gioca\n 3) Termina gioco\n");
 }
 void stampa_stanza(enum Tipo_stanza choice) { // definisco il tipo della stanza
 
