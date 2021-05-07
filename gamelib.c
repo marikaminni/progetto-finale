@@ -587,7 +587,9 @@ void gioca(int n_quest) {
       // imposto le condizioni per la vittoria
       if (quest_da_finire ==
           n_quest) { // gli astronauti vincono se completano tutte le quest
-        printf("\t\tGli astronauti vincono!\n");
+        printf("\e[1;92m\n");
+        printf("\n\t\t\t\tGli astronauti vincono!\n");
+        printf("\e[0m\n");
         sleep(3);
         playing = 0;
         break;
@@ -606,16 +608,18 @@ void gioca(int n_quest) {
       }
       if (vivi_astronauti ==
           0) { // se non ci sono più astronauti gli impostori vincono
-
-        printf("\t\tGli impostori vincono!\n");
+        printf("\e[1;92m\n");
+        printf("\t\t\t\tGli impostori vincono!\n");
+        printf("\e[0m\n");
         sleep(3);
         playing = 0;
         break;
       }
       if (vivi_impostori ==
           0) { // se non ci sono più impostori gli astronauti vincono
-
-        printf("\t\tGli astronauti vincono!\n");
+        printf("\e[1;92m\n");
+        printf("\n\t\t\t\tGli astronauti vincono!\n");
+        printf("\e[0m\n");
         sleep(3);
         playing = 0;
         break;
