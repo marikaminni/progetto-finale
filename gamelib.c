@@ -16,7 +16,6 @@ static void stampa_stanza(enum Tipo_stanza choice);
 _Bool gioco_impostato = false;
 int n_giocatori = 0, n_assassinati = 0, n_defenestrati = 0;
 int max_num_giocatori = 10;
-_Bool debug = false;
 const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
 #define GIOCATORE_ROSSO "\x1b[31m"
 #define GIOCATORE_BLU "\x1b[34m"
@@ -231,6 +230,9 @@ static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
         stampa_nome(altrogiocatore->nome);
         stampa_stato(altrogiocatore->stato);
         break;
+      } else if (altrogiocatore->stato == assassinato) {
+        stampa_nome(altrogiocatore->nome);
+        printf(" è gia stato ucciso\n");
       }
     }
   }
@@ -334,21 +336,16 @@ void imposta_gioco() {
   int scelta = 0;
   n_quest = 0;
   quest_da_finire = 0;
-  if (debug == true) {
-    scelta = 3;
-  } else {
-    do {
-      printf("Digitare un numero da 4 a 10 per impostare il numero dei "
-             "giocatori: ");
-      scanf("%d", &scelta);
-      while (getchar() != '\n')
-        ;
-
-      if (scelta < 4 || scelta > 10) {
-        printf("si deve inserire un numero compreso fra 4 e 10,riprovare\n");
-      }
-    } while (scelta < 4 || scelta > 10);
-  }
+  do {
+    printf(
+        "Digitare un numero da 4 a 10 per impostare il numero dei giocatori: ");
+    scanf("%d", &scelta);
+    while (getchar() != '\n')
+      ;
+    if (scelta < 4 || scelta > 10) {
+      printf("si deve inserire un numero compreso fra 4 e 10, riprovare\n");
+    }
+  } while (scelta < 4 || scelta > 10);
 
   giocatori = (struct Giocatore *)malloc(
       sizeof(struct Giocatore) *
@@ -412,46 +409,48 @@ void imposta_gioco() {
     }
   }
 
-  if (debug == true) {
-    n_quest = 2;
-    gioco_impostato = true;
-    stampa_giocatori();
-  } else {
+  do {
+    int tmp_n_quest;
     printf("Digitare il numero delle quest da eseguire per "
            "vincere il "
            "gioco: ");
-    scanf("%hd", &n_quest);
+    scanf("%d", &tmp_n_quest);
     while (getchar() != '\n')
       ;
+    if (tmp_n_quest < 1) {
+      printf("si deve inserire un numero maggiore o uguale a 1\n");
+    } else {
+      n_quest = (unsigned short)tmp_n_quest;
+    }
+  } while (n_quest == 0);
 
-    printf("Decidere se:\n 1) Stampare i giocatori \n 2) "
-           "Iniziare il "
-           "gioco\n");
-    scanf("%d", &scelta);
-    while (getchar() != '\n')
-      ;
+  printf("Decidere se:\n 1) Stampare i giocatori \n 2) "
+         "Iniziare il "
+         "gioco\n");
+  scanf("%d", &scelta);
+  while (getchar() != '\n')
+    ;
 
-    gioco_impostato = true;
-    do {
+  gioco_impostato = true;
+  do {
 
-      switch (scelta) {
-      case 1:
-        stampa_giocatori();
-        break;
-      case 2:
-        gioca();
-        break;
-      default:
-        printf("scelta non valida, riprovare\n");
-      }
+    switch (scelta) {
+    case 1:
+      stampa_giocatori();
+      break;
+    case 2:
+      gioca();
+      break;
+    default:
+      printf("scelta non valida, riprovare\n");
+    }
 
-    } while (scelta != 1 && scelta != 2);
-  }
+  } while (scelta != 1 && scelta != 2);
 }
 
 void gioca(int n_quest) {
   if (gioco_impostato ==
-      false) // non si può giocare se non si è impostato il gico
+      false) // non si può giocare se non si è impostato il gioco
   {
     printf("Prima devi impostare il gioco \n");
     return;
@@ -539,14 +538,18 @@ void gioca(int n_quest) {
           // controllo che la scelta presa sia tra quelle proposte
           if (scelta >= 1 && scelta <= 3) {
             scelta_corretta = scelta;
-          }
-
+          } else
+            printf(
+                "\n\e[1;37mla scelta non è tra quelle elencate, riprovare\n");
+          printf("\e[0m");
           break;
         case impostore:
           if (scelta >= 1 && scelta <= 5) {
             scelta_corretta = scelta;
-          }
-
+          } else
+            printf(
+                "\n\e[1;37mla scelta non è tra quelle elencate, riprovare\n");
+          printf("\e[0m");
           break;
         case defenestrato:
           break;
