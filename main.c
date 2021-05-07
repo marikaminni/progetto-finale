@@ -4,17 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-extern _Bool debug;
+
 int main(int argc, char **argv) {
-  if (argc == 2) {
-    if (strcmp(argv[1], "debug") == 0) {
-      debug = true;
-    }
-  }
+
   int scelta = 0;
-  if (debug == true) {
-    imposta_gioco();
-  }
 
   do {
 
