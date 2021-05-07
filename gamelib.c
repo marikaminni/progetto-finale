@@ -10,9 +10,12 @@ struct Stanza *lista_stanze;
 struct Stanza *stanza_inizio;
 unsigned short quest_da_finire, n_quest;
 static void stampa_giocatori();
-static _Bool gioco_impostato = false;
-static int n_giocatori = 0, n_assassinati = 0, n_defenestrati = 0;
-static int max_num_giocatori = 10;
+static void stampa_stato(enum Stato_giocatore stato);
+static void stampa_nome(enum Nome_giocatore nome);
+static void stampa_stanza(enum Tipo_stanza choice);
+_Bool gioco_impostato = false;
+int n_giocatori = 0, n_assassinati = 0, n_defenestrati = 0;
+int max_num_giocatori = 10;
 _Bool debug = false;
 const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
 #define GIOCATORE_ROSSO "\x1b[31m"
@@ -26,10 +29,6 @@ const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
 #define GIOCATORE_VIOLA "\x1b[35m"
 #define GIOCATORE_FUCSIA "\x1b[95m"
 #define ANSI_COLOR_RESET "\x1b[0m"
-
-void stampa_stato(enum Stato_giocatore stato);
-void stampa_nome(enum Nome_giocatore nome);
-void stampa_stanza(enum Tipo_stanza choice);
 
 static enum Tipo_stanza randomStanza() {
   // assegno le probabilità per la stanza
