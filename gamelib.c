@@ -8,7 +8,8 @@
 static struct Giocatore *giocatori;
 struct Stanza *lista_stanze;
 struct Stanza *stanza_inizio;
-unsigned short quest_da_finire, n_quest;
+unsigned short quest_da_finire;
+int quest_counter;
 static void stampa_giocatori();
 static void stampa_stato(enum Stato_giocatore stato);
 static void stampa_nome(enum Nome_giocatore nome);
@@ -126,14 +127,17 @@ static void avanza(struct Giocatore *giocatore_corrente) {
   }
 };
 static void esegui_quest(struct Giocatore *giocatore_corrente) {
+
   if (giocatore_corrente->posizione_stanza->descrizione == quest_semplice) {
-    quest_da_finire++;
-    printf("quest risolte: %d \n", quest_da_finire);
+    quest_counter++;
+    quest_da_finire--;
+    printf("quest risolte: %d\n", quest_counter);
     giocatore_corrente->posizione_stanza->descrizione = vuota;
   } else if (giocatore_corrente->posizione_stanza->descrizione ==
              quest_complicata) {
-    quest_da_finire += 2;
-    printf("quest risolte: %d \n", quest_da_finire);
+    quest_counter += 2;
+    quest_da_finire -= 2;
+    printf("quest risolte: %d\n", quest_counter);
     giocatore_corrente->posizione_stanza->descrizione = vuota;
   }
 
@@ -235,6 +239,11 @@ static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
       } else if (altrogiocatore->stato == assassinato) {
         stampa_nome(altrogiocatore->nome);
         printf(" è gia stato ucciso\n");
+      } else if (altrogiocatore->stato == impostore &&
+                 altrogiocatore->nome != giocatore_corrente->nome) {
+        stampa_nome(altrogiocatore->nome);
+        printf(" non può essere ucciso perchè\n");
+        stampa_stato(altrogiocatore->stato);
       }
     }
   }
@@ -260,7 +269,7 @@ static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
 
   if (altrogiocatore->posizione_stanza !=
       giocatore_corrente->posizione_stanza) {
-    printf("\nNon ci sono giocatori da uccidere\n");
+    printf("Non ci sono giocatori da uccidere\n");
   }
 
   if (n_defenestrati == 0) {
@@ -341,8 +350,8 @@ void imposta_gioco() {
   time_t t;
   srand((unsigned)time(&t));
   int scelta = 0;
-  n_quest = 0;
   quest_da_finire = 0;
+  quest_counter = 0;
   do {
     printf(
         "Digitare un numero da 4 a 10 per impostare il numero dei giocatori: ");
@@ -384,10 +393,10 @@ void imposta_gioco() {
 
   switch (stanza) {
   case quest_semplice:
-    n_quest++;
+    quest_da_finire++;
     break;
   case quest_complicata:
-    n_quest += 2;
+    quest_da_finire += 2;
     break;
   case botola:
     break;
@@ -427,9 +436,9 @@ void imposta_gioco() {
     if (tmp_n_quest < 1) {
       printf("si deve inserire un numero maggiore o uguale a 1\n");
     } else {
-      n_quest = (unsigned short)tmp_n_quest;
+      quest_da_finire = (unsigned short)tmp_n_quest;
     }
-  } while (n_quest == 0);
+  } while (quest_da_finire == 0);
 
   printf("Decidere se:\n 1) Stampare i giocatori \n 2) "
          "Iniziare il "
@@ -455,7 +464,7 @@ void imposta_gioco() {
   } while (scelta != 1 && scelta != 2);
 }
 
-void gioca(int n_quest) {
+void gioca() {
   if (gioco_impostato ==
       false) // non si può giocare se non si è impostato il gioco
   {
@@ -594,8 +603,9 @@ void gioca(int n_quest) {
       }
 
       // imposto le condizioni per la vittoria
-      if (quest_da_finire ==
-          n_quest) { // gli astronauti vincono se completano tutte le quest
+      if (quest_da_finire <=
+          0) { // gli astronauti vincono se completano tutte le quest
+        printf("Gli astronauti hanno completato tutte le quest\n");
         printf("\e[1;92m\n");
         printf("\n\t\t\t\tGli astronauti vincono!\n");
         printf("\e[0m\n");
