@@ -128,10 +128,12 @@ static void avanza(struct Giocatore *giocatore_corrente) {
 static void esegui_quest(struct Giocatore *giocatore_corrente) {
   if (giocatore_corrente->posizione_stanza->descrizione == quest_semplice) {
     quest_da_finire++;
+    printf("quest risolte: %d \n", quest_da_finire);
     giocatore_corrente->posizione_stanza->descrizione = vuota;
   } else if (giocatore_corrente->posizione_stanza->descrizione ==
              quest_complicata) {
     quest_da_finire += 2;
+    printf("quest risolte: %d \n", quest_da_finire);
     giocatore_corrente->posizione_stanza->descrizione = vuota;
   }
 
@@ -254,6 +256,11 @@ static void uccidi_astronauta(struct Giocatore *giocatore_corrente) {
     stampa_nome(giocatore_corrente->nome);
     stampa_stato(giocatore_corrente->stato);
     n_defenestrati++;
+  }
+
+  if (altrogiocatore->posizione_stanza !=
+      giocatore_corrente->posizione_stanza) {
+    printf("\nNon ci sono giocatori da uccidere\n");
   }
 
   if (n_defenestrati == 0) {
@@ -506,9 +513,8 @@ void gioca(int n_quest) {
         printf("Scegli una delle seguenti azioni:\n");
         int scelta;
 
-        switch (
-            giocatore_corrente
-                ->stato) { // creo il menu di scelta per le azioni del giocatori
+        switch (giocatore_corrente
+                    ->stato) { // menu di scelta per le azioni del giocatori
         case astronauta:
           printf(" -1: avanza\n");
           printf(" -2: esegui quest\n");
